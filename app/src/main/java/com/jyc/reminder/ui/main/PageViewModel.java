@@ -6,13 +6,23 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Transformations;
 import android.arch.lifecycle.ViewModel;
 
+import com.jyc.reminder.pojo.Event;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class PageViewModel extends ViewModel {
 
+    private static List<Event> events = new ArrayList<>();
+
     private MutableLiveData<Integer> mIndex = new MutableLiveData<>();
-    private LiveData<String> mText = Transformations.map(mIndex, new Function<Integer, String>() {
+    private LiveData<List<Event>> mText = Transformations.map(mIndex, new Function<Integer, List<Event>>() {
         @Override
-        public String apply(Integer input) {
-            return "Hello world from section: " + input;
+        public List<Event> apply(Integer input) {
+            return events.stream().filter(item -> {
+                return input.intValue() == 1 ? !item.getOverdue() : item.getOverdue();
+            }).collect(Collectors.toList());
         }
     });
 
@@ -20,7 +30,11 @@ public class PageViewModel extends ViewModel {
         mIndex.setValue(index);
     }
 
-    public LiveData<String> getText() {
+    public LiveData<List<Event>> getText() {
         return mText;
+    }
+
+    public static void setEvents(List<Event> events) {
+        PageViewModel.events = events;
     }
 }
