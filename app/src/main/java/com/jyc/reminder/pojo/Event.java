@@ -40,6 +40,6 @@ public class Event {
     }
 
     public String toString() {
-        return String.format("s% - s%", this.datetime, this.title);
+        return String.format("%s - %s", this.datetime, this.title);
     }
 }

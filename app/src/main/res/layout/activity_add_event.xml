@@ -83,11 +83,21 @@
             android:inputType="textPersonName" />
     </LinearLayout>
 
-    <Button
-        android:id="@+id/addBtn"
+    <LinearLayout
+        android:id="@+id/ll_buttons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="添加" />
-
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/addBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="添加" />
+        <Button
+            android:id="@+id/cancelBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="取消" />
+    </LinearLayout>
 
 </LinearLayout>
