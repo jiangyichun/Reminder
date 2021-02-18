@@ -20,7 +20,7 @@ public class EventDb extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("create table events(uuid varchar(32) primary key, title text, datetime text, overdue boolean)");
+        db.execSQL("create table events(uuid varchar(32) primary key, title text, datetime text, remind_minute int, overdue boolean)");
     }
 
     @Override
@@ -38,6 +38,7 @@ public class EventDb extends SQLiteOpenHelper {
             event.setUuid(cursor.getString(cursor.getColumnIndex("uuid")));
             event.setTitle(cursor.getString(cursor.getColumnIndex("title")));
             event.setDatetime(cursor.getString(cursor.getColumnIndex("datetime")));
+            event.setRemindMinute(cursor.getInt(cursor.getColumnIndex("remind_minute")));
             event.setOverdue(cursor.getInt(cursor.getColumnIndex("overdue")) == 1);
             result.add(event);
         }
@@ -51,8 +52,15 @@ public class EventDb extends SQLiteOpenHelper {
         }
 
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("insert into events (uuid, title, datetime, overdue) values(?, ?, ?, ?)",
-                new Object[] { event.getUuid(), event.getTitle(), event.getDatetime(), event.getOverdue() });
+        db.execSQL("insert into events (uuid, title, datetime, remind_minute, overdue) values(?, ?, ?, ?, ?)",
+                new Object[] { event.getUuid(), event.getTitle(), event.getDatetime(), event.getRemindMinute(), event.getOverdue() });
+        db.close();
+    }
+
+    public void markOverdue(String uuid) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("update events set overdue = 1 where uuid = ?",
+                new Object[] { uuid });
         db.close();
     }
 }

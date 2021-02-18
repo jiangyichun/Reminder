@@ -5,6 +5,7 @@ public class Event {
     private String uuid;
     private String title;
     private String datetime;
+    private Integer remindMinute;
     private Boolean overdue;
 
     public String getUuid() {
@@ -29,6 +30,14 @@ public class Event {
 
     public void setDatetime(String datetime) {
         this.datetime = datetime;
+    }
+
+    public Integer getRemindMinute() {
+        return remindMinute;
+    }
+
+    public void setRemindMinute(Integer remindMinute) {
+        this.remindMinute = remindMinute;
     }
 
     public Boolean getOverdue() {

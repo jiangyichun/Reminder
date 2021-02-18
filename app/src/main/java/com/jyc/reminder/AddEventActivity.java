@@ -1,10 +1,14 @@
 package com.jyc.reminder;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -15,11 +19,13 @@ import android.widget.Toast;
 
 import com.jyc.reminder.db.EventDb;
 import com.jyc.reminder.pojo.Event;
+import com.jyc.reminder.service.AlarmService;
 import com.jyc.reminder.util.ToastUtils;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Calendar;
+import java.util.UUID;
 
 public class AddEventActivity extends AppCompatActivity implements DatePicker.OnDateChangedListener, TimePicker.OnTimeChangedListener {
 
@@ -140,12 +146,14 @@ public class AddEventActivity extends AppCompatActivity implements DatePicker.On
     }
 
     private void handleAddEvent() {
-        if(this.saveEvent()) {
+        Event event = this.saveEvent();
+        if(event != null) {
+            this.setUpEventAlarm(event);
             this.navToMain();
         }
     }
 
-    private boolean saveEvent() {
+    private Event saveEvent() {
         String name = eventNameInput.getText().toString();
         String date = eventDateInput.getText().toString();
         String time = eventTimeInput.getText().toString();
@@ -154,39 +162,87 @@ public class AddEventActivity extends AppCompatActivity implements DatePicker.On
         if(name == null || "".equals(name.trim())) {
             //Toast.makeText(this,"事件名称不能为空！", Toast.LENGTH_SHORT).show();
             ToastUtils.show(this, "事件名称不能为空！");
-            return false;
+            return null;
         }
 
         if(date == null || "".equals(date.trim())) {
             Toast.makeText(this,"日期不能为空！", Toast.LENGTH_SHORT).show();
-            return false;
+            return null;
         }
 
         if(time == null || "".equals(time.trim())) {
             Toast.makeText(this,"时间不能为空！", Toast.LENGTH_SHORT).show();
-            return false;
+            return null;
         }
 
         if(remind == null || "".equals(remind.trim())) {
             Toast.makeText(this,"多久提醒不能为空！", Toast.LENGTH_SHORT).show();
-            return false;
+            return null;
         } else {
             try {
                 Integer.parseInt(remind);
             } catch(Exception e) {
                 Toast.makeText(this,"多久提醒必须为整数！", Toast.LENGTH_SHORT).show();
-                return false;
+                return null;
             }
         }
 
         Event event = new Event();
+        event.setUuid(UUID.randomUUID().toString());
         event.setTitle(name);
         event.setDatetime(date + " " + time);
+        event.setRemindMinute(Integer.parseInt(remind));
         event.setOverdue(false);
 
         EventDb eventDb = new EventDb(this);
         eventDb.addEvent(event);
-        return true;
+        return event;
+    }
+
+    private void setUpEventAlarm(Event event) {
+        String[] dateTimeStr = event.getDatetime().split(" ");
+        String[] dateStr = dateTimeStr[0].split("-");
+        String[] timeStr = dateTimeStr[1].split(":");
+        int year = Integer.parseInt(dateStr[0]);
+        int month = Integer.parseInt(dateStr[1]);
+        int day = Integer.parseInt(dateStr[2]);
+        int hour = Integer.parseInt(timeStr[0]);
+        int minute = Integer.parseInt(timeStr[1]);
+        Log.i("alarm", String.format("Alarm year: %d, month: %d, day: %d, hour: %d, minute: %d", year, month, day, hour, minute));
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, year);
+        calendar.set(Calendar.MONTH, month - 1);
+        calendar.set(Calendar.DAY_OF_MONTH, day);
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        calendar.set(Calendar.SECOND, 0);
+
+        // The alarm time of reminding before event happens
+        long millisOfAlarmAhead = calendar.getTimeInMillis() - event.getRemindMinute() * 60 * 1000;
+        String alarmMessageAhead = String.format("还有 %d 分钟：'%s'", event.getRemindMinute(), event.getTitle());
+
+        // The alarm time of reminding when event really happens
+        long millisOfAlarmFinal = calendar.getTimeInMillis();
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        // 1. Set alarm before event happens
+        Intent intent = new Intent(this, AlarmService.class);
+        //action is part of the identity of the PendingIntent instance
+        intent.setAction(event.getUuid());
+        intent.putExtra("message", alarmMessageAhead);
+        // Request code '0' for alarm before
+        PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, millisOfAlarmAhead, pendingIntent);
+
+        // 2. Set alarm when event happens
+        intent = new Intent(this, AlarmService.class);
+        //action is part of the identity of the PendingIntent instance
+        intent.setAction(event.getUuid());
+        intent.putExtra("message", event.getTitle());
+        intent.putExtra("overdue", 1);
+        // Request code '1' for alarm when event happens
+        pendingIntent = PendingIntent.getService(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, millisOfAlarmFinal, pendingIntent);
     }
 
     private void navToMain() {

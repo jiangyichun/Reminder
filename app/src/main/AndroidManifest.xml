@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.jyc.reminder">
 
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -9,10 +12,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Reminder">
-        <activity android:label="添加日程事件" android:name=".AddEventActivity">
+        <service
+            android:name=".service.AlarmService"
+            android:enabled="true"
+            android:exported="true"></service>
+
+        <activity
+            android:name=".AddEventActivity"
+            android:label="添加日程事件">
             <intent-filter>
-                <action android:name="AddEvent"/>
-                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="AddEvent" />
+
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity
@@ -21,6 +32,7 @@
             android:theme="@style/Theme.Reminder.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
