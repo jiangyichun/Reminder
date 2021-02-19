@@ -57,6 +57,12 @@ public class EventDb extends SQLiteOpenHelper {
         db.close();
     }
 
+    public void deleteEvent(String uuid) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("delete from events where uuid = ?", new Object[] { uuid });
+        db.close();
+    }
+
     public void markOverdue(String uuid) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("update events set overdue = 1 where uuid = ?",

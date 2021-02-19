@@ -6,14 +6,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.support.annotation.Nullable;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 
-import com.jyc.reminder.MainActivity;
 import com.jyc.reminder.R;
 import com.jyc.reminder.pojo.Event;
 
@@ -54,11 +52,12 @@ public class PlaceholderFragment extends Fragment {
             Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_main, container, false);
         final ListView listView = root.findViewById(R.id.list_view);
-        pageViewModel.getText().observe(this, new Observer<List<Event>>() {
+        pageViewModel.getEvents().observe(this, new Observer<List<Event>>() {
             @Override
             public void onChanged(@Nullable List<Event> events) {
-                ArrayAdapter<String> adapter = new ArrayAdapter<String>(inflater.getContext(), android.R.layout.simple_expandable_list_item_1,
-                        events.stream().map(Event::toString).toArray(String[]::new));
+//                ArrayAdapter<String> adapter = new ArrayAdapter<String>(inflater.getContext(), android.R.layout.simple_expandable_list_item_1,
+//                        events.stream().map(Event::toString).toArray(String[]::new));
+                EventListAdapter adapter = new EventListAdapter(events, inflater.getContext());
                 listView.setAdapter(adapter);
             }
         });

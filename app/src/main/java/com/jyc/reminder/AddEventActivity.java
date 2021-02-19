@@ -150,6 +150,7 @@ public class AddEventActivity extends AppCompatActivity implements DatePicker.On
         if(event != null) {
             this.setUpEventAlarm(event);
             this.navToMain();
+            ToastUtils.show(this, "添加成功！");
         }
     }
 
@@ -232,7 +233,7 @@ public class AddEventActivity extends AppCompatActivity implements DatePicker.On
         intent.putExtra("message", alarmMessageAhead);
         // Request code '0' for alarm before
         PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, millisOfAlarmAhead, pendingIntent);
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, millisOfAlarmAhead, pendingIntent);
 
         // 2. Set alarm when event happens
         intent = new Intent(this, AlarmService.class);
@@ -242,7 +243,7 @@ public class AddEventActivity extends AppCompatActivity implements DatePicker.On
         intent.putExtra("overdue", 1);
         // Request code '1' for alarm when event happens
         pendingIntent = PendingIntent.getService(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, millisOfAlarmFinal, pendingIntent);
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, millisOfAlarmFinal, pendingIntent);
     }
 
     private void navToMain() {

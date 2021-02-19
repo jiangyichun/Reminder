@@ -17,7 +17,7 @@ public class PageViewModel extends ViewModel {
     private static List<Event> events = new ArrayList<>();
 
     private MutableLiveData<Integer> mIndex = new MutableLiveData<>();
-    private LiveData<List<Event>> mText = Transformations.map(mIndex, new Function<Integer, List<Event>>() {
+    private LiveData<List<Event>> mEvents = Transformations.map(mIndex, new Function<Integer, List<Event>>() {
         @Override
         public List<Event> apply(Integer input) {
             return events.stream().filter(item -> {
@@ -30,8 +30,8 @@ public class PageViewModel extends ViewModel {
         mIndex.setValue(index);
     }
 
-    public LiveData<List<Event>> getText() {
-        return mText;
+    public LiveData<List<Event>> getEvents() {
+        return mEvents;
     }
 
     public static void setEvents(List<Event> events) {

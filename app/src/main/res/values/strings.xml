@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">日程提醒</string>
-    <string name="tab_text_1">未来日程</string>
-    <string name="tab_text_2">结束日程</string>
+    <string name="app_name">提醒小助手</string>
+    <string name="tab_text_1">未来事件</string>
+    <string name="tab_text_2">结束事件</string>
 </resources>
